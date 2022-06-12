@@ -16,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.locationupdate.locationService.LocationService
+import com.example.locationupdate.utils.AppsConstant.DATA_PRESENT
+import com.example.locationupdate.utils.AppsConstant.MY_SHARED_PREF
 import com.example.locationupdate.utils.Utility
 
 class MainActivity : AppCompatActivity() {
@@ -86,6 +88,18 @@ class MainActivity : AppCompatActivity() {
             stopService()
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val preferences = getSharedPreferences(MY_SHARED_PREF, MODE_PRIVATE)
+        val isNameAndMobileSet = preferences.getBoolean(DATA_PRESENT, false)
+        if (!isNameAndMobileSet) {
+            Intent(this, BasicDetailActivity::class.java).also {
+                startActivity(it)
+                finish()
+            }
+        }
     }
     @SuppressLint("InlinedApi")
     private fun requestBackgroundLocationPermission() {

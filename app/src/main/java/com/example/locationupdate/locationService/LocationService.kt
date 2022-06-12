@@ -48,8 +48,6 @@ class LocationService : Service() {
         }
     }
 
-    /*******************/
-
     override fun onCreate() {
         super.onCreate()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)

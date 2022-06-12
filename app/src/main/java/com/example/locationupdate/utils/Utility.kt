@@ -4,8 +4,6 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.util.Log
-import java.io.File
-import java.io.FileOutputStream
 
 object Utility {
 
@@ -26,15 +24,22 @@ object Utility {
     }
 
     fun writeToFile(fileName:String, writingContent:String, context:Context) {
-        val path = context.filesDir
         try {
-            val writer = FileOutputStream(File(path,fileName))
-            writer.write(writingContent.toByteArray())
-            writer.close()
-            Log.i(TAG, "wrote to file: $fileName")
-        } catch (e: Exception) {
-            e.printStackTrace()
+            context.openFileOutput(fileName, Context.MODE_PRIVATE).use {
+                it.write(writingContent.toByteArray())
+            }
+        } catch (securityException : SecurityException) {
+            securityException.printStackTrace()
         }
 
+    }
+
+    fun readFromFile(fileName:String, context: Context) {
+        context.openFileInput(fileName).bufferedReader().useLines { lines ->
+            lines.fold("") { some, text ->
+                Log.i(TAG, "readFromFile: $some\n$text")
+                "$some\n$text"
+            }
+        }
     }
 }

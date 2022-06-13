@@ -4,6 +4,10 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import java.io.*
+
 
 object Utility {
 
@@ -24,22 +28,34 @@ object Utility {
     }
 
     fun writeToFile(fileName:String, writingContent:String, context:Context) {
+        val file = File(context.filesDir, fileName)
         try {
-            context.openFileOutput(fileName, Context.MODE_PRIVATE).use {
-                it.write(writingContent.toByteArray())
-            }
-        } catch (securityException : SecurityException) {
-            securityException.printStackTrace()
+            val buffer = BufferedWriter(FileWriter(file))
+            buffer.append(writingContent)
+            buffer.newLine()
+            buffer.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
 
     }
 
-    fun readFromFile(fileName:String, context: Context) {
-        context.openFileInput(fileName).bufferedReader().useLines { lines ->
-            lines.fold("") { some, text ->
-                Log.i(TAG, "readFromFile: $some\n$text")
-                "$some\n$text"
+    fun readFromFile(fileName:String, context: Context):LiveData<String> {
+        val file = File(context.filesDir, fileName)
+
+        val text:MutableLiveData<String> = MutableLiveData()
+        try {
+            val br = BufferedReader(FileReader(file))
+            var line: String?
+            while (br.readLine().also { line = it } != null) {
+                text.postValue(line)
+                //Toast.makeText(context, "$text", Toast.LENGTH_SHORT).show()
             }
+            br.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
+
+        return text
     }
 }

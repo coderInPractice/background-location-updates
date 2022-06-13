@@ -17,6 +17,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.MutableLiveData
+import com.example.locationupdate.utils.AppsConstant.FILE_NAME
 import com.example.locationupdate.utils.Utility
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest.create
@@ -26,9 +28,14 @@ class LocationService : Service() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    companion object {
+        var currLoc = MutableLiveData<String>()
+    }
+
+
     private val locationRequest: LocationRequest = create().apply {
-        interval = 3000
-        fastestInterval = 3000
+        interval = (60 * 5000)
+        fastestInterval = (60 * 2000)
         priority = PRIORITY_BALANCED_POWER_ACCURACY
         maxWaitTime = 5000
     }
@@ -37,13 +44,19 @@ class LocationService : Service() {
         override fun onLocationResult(locationResult: LocationResult) {
             val locationList = locationResult.locations
             if (locationList.isNotEmpty()) {
+                for (location in locationList) {
+                    Toast.makeText(this@LocationService, "Latitude: " + location.latitude.toString() + '\n' +
+                            "Longitude: "+ location.longitude, Toast.LENGTH_LONG).show()
+                    val informationToWrite = "Latitude: ${location.latitude}\nLongitude: ${location.longitude}\n"
+                    Utility.writeToFile(FILE_NAME, informationToWrite, this@LocationService)
+                    Log.d("Location d", location.latitude.toString())
+                    Log.i("Location i", location.latitude.toString())
+                    currLoc.postValue(informationToWrite)
+                }
                 val location = locationList.last()
 //                Toast.makeText(this@LocationService, "Latitude: " + location.latitude.toString() + '\n' +
 //                        "Longitude: "+ location.longitude, Toast.LENGTH_LONG).show()
-                val informationToWrite = "Latitude: ${location.latitude} \n Longitude: ${location.longitude} \n"
-                Utility.writeToFile("location_updates", informationToWrite, this@LocationService)
-                Log.d("Location d", location.latitude.toString())
-                Log.i("Location i", location.latitude.toString())
+
             }
         }
     }

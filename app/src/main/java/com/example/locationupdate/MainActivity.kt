@@ -11,10 +11,12 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
 import com.example.locationupdate.locationService.LocationService
 import com.example.locationupdate.utils.AppsConstant.DATA_PRESENT
 import com.example.locationupdate.utils.AppsConstant.MY_SHARED_PREF
@@ -30,12 +32,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mServiceIntent: Intent
     private lateinit var startBtn: Button
     private lateinit var stopBtn: Button
+    private lateinit var currentLoc:TextView
+    private var currentLocLiveData: LiveData<String> = LocationService.currLoc
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         startBtn = findViewById(R.id.startServiceBtn)
         stopBtn = findViewById(R.id.StopServiceBtn)
+        currentLoc = findViewById(R.id.current_loc_tv)
 
         startBtn.setOnClickListener {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -100,6 +105,9 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         }
+        currentLocLiveData.observe(this, {
+            currentLoc.text = it
+        })
     }
     @SuppressLint("InlinedApi")
     private fun requestBackgroundLocationPermission() {
@@ -134,7 +142,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(this, "ACCESS_FINE_LOCATION permission denied", Toast.LENGTH_LONG).show()
                     if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", this.packageName, null),),)
+                        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", this.packageName, null)))
                     }
                 }
                 return

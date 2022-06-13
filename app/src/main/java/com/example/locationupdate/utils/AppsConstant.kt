@@ -6,4 +6,5 @@ object AppsConstant {
     const val NAME = "name"
     const val MOBILE_NUMBER = "mobile_number"
     const val DATA_PRESENT = "data_present"
+    const val FILE_NAME = "location_updates.txt"
 }
